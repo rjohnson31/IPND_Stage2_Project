@@ -1,0 +1,3 @@
+forensic data imaging proprietary basic
+*****
+The FTK (Forensics Tool Kit) Imager is a free, limited function electronic data evidence preview and imaging tool.  It is developed by AccessData (http://accessdata.com/), a leader in forensics applications and services.  The FTK Imager, however, is far from AccessData's fully functional proprietary Forensic Tool Kit (FTK), which sells for approximately $3000-4000 US.  FTK Imager is, however, one of the more common, basic tools used for initial access and assessment of electronic data evidence. 
