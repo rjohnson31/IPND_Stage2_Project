@@ -1,30 +1,30 @@
-# IPND Stage 2 Final Project
-
-sample = '''A ___1___ is created with the def keyword. You specify the inputs a ___1___ takes by
-adding ___2___ separated by commas between the parentheses. ___1___s by default return ___3___ if you
-don't specify the value to return. ___2___ can be standard data types such as string, number, dictionary,
-tuple, and ___4___ or can be more complicated such as objects and lambda functions.'''
-
-# The answer for ___1___ is 'function'. Can you figure out the others?
-
-# We've also given you a file called fill-in-the-blanks.pyc which is a working version of the project.
-# A .pyc file is a Python file that has been translated into "byte code".
-# This means the code will run the same as the original .py file, but when you open it
-# it won't look like Python code! But you can run it just like a regular Python file
-# to see how your code should behave.
-
-# Hint: It might help to think about how this project relates to the Mad Libs generator you built with Sean.
-# In the Mad Libs generator, you take a paragraph and replace all instances of NOUN and VERB.
-# How can you adapt that design to work with numbered blanks?
-
-# If you need help, you can sign up for a 1 on 1 coaching appointment: https://calendly.com/ipnd1-1/20min/
+'''
+PROGRAM: fill-in-the-blanks.py
+PURPOSE: This program takes user input regarding difficulty of the exercise and
+	the number of guesses available to the user.  It then reads the appropriate file
+	based on the difficulty chosen, sets up the study words and the passage(s).  
+	Depending on the difficulty, it may display hints under the passage(s).  It then
+	queries the user for appropriate answers for the fill-in-the-blanks.  As the 
+	user inputs the correct answers, the word is placed into the passage(s) and 
+	the user is prompted for the next answer until the maximum number of attempts
+	is reached or all of the answers are successfully completed.
+AUTHOR: CJ
+DATE: 11Aug16
+COURSE: IPND - Stage 2 Project 
+'''
 
 content = ""
 difficulty = ""
+max_attempts = 0
 study_words = []
 study_paragraph = ""
 
 
+#set_difficulty() prompts the user for the desired difficulty.  The response is returned and 
+#   used both to point to the appropriate file to open for content and to adjust the 
+#   level of hints displayed on the board.
+#TODO:  Implement changes to have filenames (topics) to be chosen to set the appropriate
+#   file to use.  Difficulty should only affect the hints given, not content.
 def set_difficulty():
     attempt = 0
     while True:
@@ -37,14 +37,43 @@ def set_difficulty():
             if difficulty.lower() == "easy" or difficulty.lower() ==  "medium" or difficulty.lower() == "hard":
                 return difficulty
         attempt += 1    
-            
 
+#set_max_attempts() prompts user for max attempts from 1 to 10.  Return initiates
+#  a default value of 5.
+#TODO:  Consolidate with set_difficulty() so that the user is prompted once for both values.
+def set_max_attempts():
+    attempt = 0
+    while True:
+        if attempt == 0:            
+            max_attempts = raw_input("What is the maximum number of attempts you want to try for each question (1-10; return for default = 5): ")
+            if max_attempts == '':	# Null input is for default max_attempts
+            	max_attempts = 5	# 5 is an arbitrarily chosen default value for max_attempts
+            	return max_attempts
+            if 1 <= int(max_attempts) <= 10:
+                max_attempts = int(max_attempts)
+                return max_attempts
+        else:
+            max_attempts = raw_input("Attempt #" + str(attempt) + ": Please enter a number from 1 to 10 or simply press return for the default: ")
+            if max_attempts == '':
+            	max_attempts = 5
+            	return max_attempts
+            if 1 <= int(max_attempts) <= 10:
+                max_attempts = int(max_attempts)
+                return max_attempts
+        attempt += 1 
+            
+#get_content() opens a file based on the difficulty chosen and reads in the contents
+#  for processing by set_up_paragraph() and set_study_words.
+#TODO:  Change this area to display folder "files/" contents and prompt user for choice
+#  of "topic" they would like to study.
 def get_content(difficulty):
     with open("files/" + difficulty + ".txt", "r") as study_file:
         content = study_file.read()
     return content
 
-
+#set_study_word() gleens the words at the top of the content and creates a list of the
+#  word and an incremented number.  Both used when replacing the words and indicating
+#  within the paragraph where that word goes.
 def set_study_words(paragraph):
     words = []
     words_end = "*****"
@@ -57,14 +86,19 @@ def set_study_words(paragraph):
             number += 1
     return words
     
-
+#set_up_paragraph() takes the main paragraph(s), identifies and replaces all instances
+#  of a study word with the requisite blanks and its associated number (___1___).
+#TODO:  Capitalization is lost.  Misses rare instances of words (e.g., "-study_word")
+#  Paragraph/Line formatting is lost.  Flash-card functionality is a thought, too.
 def set_up_paragraph(paragraph, study_words):
     new_paragraph = ""
-    paragraph_start = paragraph.find("*****") + 5
+    paragraph_start = paragraph.find("*****") + 5 
+    # 5 is the length of the arbitrarily designated separator "*****"
+    # Since the feeder files are editable insofar as study words and paragraph, 
+    # a clear separator was required.  This code breaks down without it or with multiple in the file. 
     study_paragraph = paragraph[paragraph_start:].split()
     replacement_word_start = 0
     replacement_word_end = 0
-
     for string in study_paragraph:
         new_string = ""
         search_term = ""
@@ -81,13 +115,15 @@ def set_up_paragraph(paragraph, study_words):
         new_paragraph += new_string + " "
     return new_paragraph
     
-
-def set_up_board(difficulty, study_paragraph, study_words):
+#set_up_board() displays the full board to the user.
+#TODO:  Hints area shows only on initial display.  Except for "hard," it should 
+#  show for each display and the hint word display should update according to the 
+#  correct responses.  Randomize words for hint display.   
+def set_up_board(difficulty, study_paragraph, study_words, max_attempts):
     print "\n\nYou have chosen the \"" + difficulty + "\" level of difficulty."
-    print "\nYou will get 5 guesses per problem."
+    print "\nYou will get " + str(max_attempts) + " guesses per problem."
     print "\nThe current paragraph reads as:"
-    print study_paragraph 
-    
+    print study_paragraph  
     if difficulty == "easy":
         print "\nPossible words:\n--------------------------"
         for word in study_words[::-1]:
@@ -103,75 +139,44 @@ def set_up_board(difficulty, study_paragraph, study_words):
     if difficulty == "hard":
         print "\n--------------------------\nNo clues on \"hard\" difficulty.  :)"
         
-
-def fill_answers(paragraph, word):
-    paragraph = paragraph.replace("___" + str(word[1]) + "___", word[0])
-    return paragraph
-
-    
-def get_user_answers(paragraph, study_words):
+#get_user_answers() prompts user for answers, tracks progress and initiates paragraph
+#  word replacement on correct responses.  Quits program when max_attempts or complete.
+#TODO:  Implement sleep delay before quit().    
+def get_user_answers(paragraph, study_words, max_attempts):
     if study_words == []:
         print "Congratulations!  You got them all right!"
         quit()
     for word in study_words:
-        tries = 0
-        while tries < 5:
-            answer = raw_input("\n\nWhat would be the replacement for ___" + str(word[1]) + "___? ==> ")
+        tries = 1
+        while tries <= max_attempts:
+            answer = raw_input("\n\nWhat would be the replacement for ___" 
+            	+ str(word[1]) + "___? Try " + str(tries) + " of " 
+            	+ str(max_attempts) + ":  " )
             if answer.lower() == word[0]:
                 print "Correct!\n"
                 paragraph = fill_answers(paragraph, word)
                 print paragraph
                 study_words.remove(word)
-                get_user_answers(paragraph, study_words)
+                get_user_answers(paragraph, study_words, max_attempts)
             tries += 1
         quit()
-    
 
-def do_exercise(paragraph, difficulty):
+#fill_answers() replaces the blanks and number with the appropriate word on correct responses.
+#TODO:  Capitalization not maintained.
+def fill_answers(paragraph, word):
+    filled_in_paragraph = paragraph.replace("___" + str(word[1]) + "___", word[0])
+    return filled_in_paragraph
+    
+#do_exercise() initializes primary program procedures and variables.
+def do_exercise(paragraph, difficulty, max_attempts):
     difficulty = set_difficulty()
+    max_attempts = set_max_attempts()
     paragraph = get_content(difficulty)
     study_words = set_study_words (paragraph)
     study_paragraph = set_up_paragraph(paragraph, study_words)
-    set_up_board(difficulty, study_paragraph, study_words)
-    get_user_answers(study_paragraph, study_words)
+    set_up_board(difficulty, study_paragraph, study_words, max_attempts)
+    get_user_answers(study_paragraph, study_words, max_attempts)
     
 
-
-do_exercise(content, difficulty)
-
-
-
-# You've built a Mad-Libs game with some help from Sean.
-# Now you'll work on your own game to practice your skills and demonstrate what you've learned.
-
-# For this project, you'll be building a Fill-in-the-Blanks quiz.
-# Your quiz will prompt a user with a paragraph containing several blanks.
-# The user should then be asked to fill in each blank appropriately to complete the paragraph.
-# This can be used as a study tool to help you remember important vocabulary!
-
-# Note: Your game will have to accept user input so, like the Mad Libs generator,
-# you won't be able to run it using Sublime's `Build` feature.
-# Instead you'll need to run the program in Terminal or IDLE.
-# Refer to Work Session 5 if you need a refresher on how to do this.
-
-# To help you get started, we've provided a sample paragraph that you can use when testing your code.
-# Your game should consist of 3 or more levels, so you should add your own paragraphs as well
-
-      #sample = '''A ___1___ is created with the def keyword. You specify the inputs a ___1___ takes by
-      #adding ___2___ separated by commas between the parentheses. ___1___s by default return ___3___ if you
-      #don't specify the value to return. ___2___ can be standard data types such as string, number, dictionary,
-      #tuple, and ___4___ or can be more complicated such as objects and lambda functions.'''
-
-# The answer for ___1___ is 'function'. Can you figure out the others?
-
-# We've also given you a file called fill-in-the-blanks.pyc which is a working version of the project.
-# A .pyc file is a Python file that has been translated into "byte code".
-# This means the code will run the same as the original .py file, but when you open it
-# it won't look like Python code! But you can run it just like a regular Python file
-# to see how your code should behave.
-
-# Hint: It might help to think about how this project relates to the Mad Libs generator you built with Sean.
-# In the Mad Libs generator, you take a paragraph and replace all instances of NOUN and VERB.
-# How can you adapt that design to work with numbered blanks?
-
-# If you need help, you can sign up for a 1 on 1 coaching appointment: https://calendly.com/ipnd1-1/20min/  
+#do_exercise() - initialization call.
+do_exercise(content, difficulty, max_attempts)
