@@ -42,24 +42,16 @@ def set_difficulty():
 #  a default value of 5.
 #TODO:  Consolidate with set_difficulty() so that the user is prompted once for both values.
 def set_max_attempts():
-    attempt = 0
+    attempt, min_attempts, max_attempts, default_attempts = 0, 1, 10, 5 
     while True:
         if attempt == 0:            
-            max_attempts = raw_input("What is the maximum number of attempts you want to try for each question (1-10; return for default = 5): ")
-            if max_attempts == '':	# Null input is for default max_attempts
-            	max_attempts = 5	# 5 is an arbitrarily chosen default value for max_attempts
-            	return max_attempts
-            if 1 <= int(max_attempts) <= 10:
-                max_attempts = int(max_attempts)
-                return max_attempts
-        else:
-            max_attempts = raw_input("Attempt #" + str(attempt) + ": Please enter a number from 1 to 10 or simply press return for the default: ")
-            if max_attempts == '':
-            	max_attempts = 5
-            	return max_attempts
-            if 1 <= int(max_attempts) <= 10:
-                max_attempts = int(max_attempts)
-                return max_attempts
+            user_input = raw_input("What is the maximum number of attempts you want to try for each question (1-10; return for default = 5): ")
+            if user_input == '':
+                user_input = default_attempts 
+                return user_input
+            if min_attempts <= int(user_input) <= max_attempts:
+                user_input = int(user_input) 
+                return user_input
         attempt += 1 
             
 #get_content() opens a file based on the difficulty chosen and reads in the contents
@@ -91,27 +83,22 @@ def set_study_words(paragraph):
 #TODO:  Capitalization is lost.  Misses rare instances of words (e.g., "-study_word")
 #  Paragraph/Line formatting is lost.  Flash-card functionality is a thought, too.
 def set_up_paragraph(paragraph, study_words):
-    new_paragraph = ""
-    paragraph_start = paragraph.find("*****") + 5 
+    new_paragraph, paragraph_start = "", paragraph.find("*****") + 5 
     # 5 is the length of the arbitrarily designated separator "*****"
     # Since the feeder files are editable insofar as study words and paragraph, 
     # a clear separator was required.  This code breaks down without it or with multiple in the file. 
     study_paragraph = paragraph[paragraph_start:].split()
-    replacement_word_start = 0
-    replacement_word_end = 0
+    replacement_word_start = replacement_word_end = 0
     for string in study_paragraph:
-        new_string = ""
-        search_term = ""
+        new_string = search_term = ""
         for word in study_words:
-            search_term = string.lower()
-            if search_term.find(word[0]) == -1:
-                  new_string = string    
-            else:
-                  if search_term.find(word[0]) != -1:
-                      replacement_word_start = search_term.find(word[0])
-                      replacement_word_end = replacement_word_start + len(word[0])
-                      new_string = string.replace(string[replacement_word_start:replacement_word_end], "___" + str(word[1]) + "___")
-                      break
+            if string.lower().find(word[0]) == -1:
+                new_string = string    
+            elif string.lower().find(word[0]) != -1:
+                replacement_word_start = string.lower().find(word[0])
+                replacement_word_end = replacement_word_start + len(word[0])
+                new_string = string.replace(string[replacement_word_start:replacement_word_end], "___" + str(word[1]) + "___")
+                break
         new_paragraph += new_string + " "
     return new_paragraph
     
@@ -128,14 +115,12 @@ def set_up_board(difficulty, study_paragraph, study_words, max_attempts):
         print "\nPossible words:\n--------------------------"
         for word in study_words[::-1]:
             print word[0],
-        print "\n--------------------------"
     if difficulty == "medium":
         print "\nPossible words (masked):\n--------------------------"
         for word in study_words[::-1]:
             print " ",
             for char in word[0]:
                 print "*",
-        print "\n--------------------------"
     if difficulty == "hard":
         print "\n--------------------------\nNo clues on \"hard\" difficulty.  :)"
         
